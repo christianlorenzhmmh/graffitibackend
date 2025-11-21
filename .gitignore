@@ -1,6 +1,8 @@
-node_modules/
+target/
 uploads/
 .env
 *.log
 .DS_Store
-coverage/
+.idea/
+*.iml
+.vscode/
