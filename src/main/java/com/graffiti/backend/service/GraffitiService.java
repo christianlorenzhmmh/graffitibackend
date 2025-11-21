@@ -4,6 +4,7 @@ import com.graffiti.backend.entity.Graffiti;
 import com.graffiti.backend.exception.ResourceNotFoundException;
 import com.graffiti.backend.repository.GraffitiRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GraffitiService {
 
     private final GraffitiRepository graffitiRepository;
@@ -131,7 +133,7 @@ public class GraffitiService {
             }
         } catch (IOException e) {
             // Log error but don't fail the operation
-            System.err.println("Error deleting photo: " + e.getMessage());
+            log.error("Error deleting photo: {}", e.getMessage(), e);
         }
     }
 }

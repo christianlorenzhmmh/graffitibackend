@@ -3,7 +3,6 @@ package com.graffiti.backend.controller;
 import com.graffiti.backend.dto.ApiResponse;
 import com.graffiti.backend.entity.Graffiti;
 import com.graffiti.backend.service.GraffitiService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

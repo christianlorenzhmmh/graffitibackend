@@ -24,7 +24,14 @@ public class FileController {
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
         try {
-            Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Path filePath = uploadPath.resolve(filename).normalize();
+            
+            // Security check: ensure the resolved path is still within the upload directory
+            if (!filePath.startsWith(uploadPath)) {
+                return ResponseEntity.notFound().build();
+            }
+            
             Resource resource = new UrlResource(filePath.toUri());
 
             if (resource.exists() && resource.isReadable()) {
