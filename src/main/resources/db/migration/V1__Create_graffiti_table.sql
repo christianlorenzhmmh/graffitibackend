@@ -1,9 +1,3 @@
--- REFERENCE ONLY - Schema is managed by Flyway migrations
--- See: src/main/resources/db/migration/V1__Create_graffiti_table.sql
---
--- This file is kept as documentation for the database schema.
--- DO NOT execute this file directly. Use Flyway migrations instead.
-
 -- Create graffiti table
 CREATE TABLE IF NOT EXISTS graffiti (
     id BIGSERIAL PRIMARY KEY,

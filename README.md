@@ -5,6 +5,7 @@ A RESTful API backend for managing graffiti reports with photo uploads, built wi
 ## Features
 
 - 🗄️ PostgreSQL database for data storage with JPA/Hibernate
+- 🔄 Flyway for database migrations
 - 📸 Photo upload to filesystem with Spring MultipartFile
 - 🔒 File validation (images only, 10MB limit)
 - 🚀 RESTful API endpoints
@@ -40,6 +41,8 @@ export DB_PASSWORD=your_password
 ```bash
 createdb graffitidb
 ```
+
+Note: Database tables will be created automatically by Flyway migrations when you start the application for the first time.
 
 4. Build the project:
 ```bash
@@ -82,10 +85,37 @@ See full API documentation in the detailed README sections above.
 - **Java 17**
 - **Spring Boot 3.2.0**
 - **Spring Data JPA**
+- **Flyway** - Database migrations
 - **PostgreSQL**
 - **Lombok**
 - **JUnit 5**
 - **Maven**
+
+## Database Migrations
+
+This application uses Flyway for database schema management. Migration files are located in `src/main/resources/db/migration/`.
+
+### Migration Naming Convention
+- `V1__Create_graffiti_table.sql` - Initial schema
+- `V2__Add_new_column.sql` - Example for future migrations
+
+### Creating New Migrations
+1. Create a new SQL file in `src/main/resources/db/migration/`
+2. Name it following the pattern: `V{version}__{description}.sql`
+3. Add your SQL DDL statements
+4. Restart the application - Flyway will automatically apply the migration
+
+### Migration Commands
+```bash
+# Migrate database (happens automatically on app start)
+mvn spring-boot:run
+
+# Get migration info
+mvn flyway:info
+
+# Validate migrations
+mvn flyway:validate
+```
 
 ## License
 
