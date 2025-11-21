@@ -1,0 +1,8 @@
+-- Example migration file
+-- This demonstrates how to add a new column to the graffiti table
+-- To use this migration:
+-- 1. Rename this file to V2__Add_example_column.sql
+-- 2. Uncomment the SQL below
+-- 3. Restart the application
+
+-- ALTER TABLE graffiti ADD COLUMN example_field VARCHAR(100);
