@@ -58,9 +58,25 @@ public class GraffitiControllerIntegrationTest {
     
     @Test
     public void testAddGraffitiData() throws Exception {
+        // First upload a photo
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "test-photo.jpg",
+            MediaType.IMAGE_JPEG_VALUE,
+            "test image content".getBytes()
+        );
+        
+        MvcResult uploadResult = mockMvc.perform(multipart("/api/uploadGraffitiPhoto")
+                .file(file))
+            .andExpect(status().isOk())
+            .andReturn();
+        
+        String uploadResponse = uploadResult.getResponse().getContentAsString();
+        Long photoId = objectMapper.readTree(uploadResponse).get("photoId").asLong();
+        
         GraffitiDataRequest request = new GraffitiDataRequest(
             "Street Art",
-            1L,
+            photoId,
             "urban,colorful",
             40.7128,
             -74.0060,
@@ -73,7 +89,6 @@ public class GraffitiControllerIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").exists())
             .andExpect(jsonPath("$.title").value("Street Art"))
-            .andExpect(jsonPath("$.photoId").value(1))
             .andExpect(jsonPath("$.tags").value("urban,colorful"))
             .andExpect(jsonPath("$.latitude").value(40.7128))
             .andExpect(jsonPath("$.longitude").value(-74.0060))
@@ -134,5 +149,52 @@ public class GraffitiControllerIntegrationTest {
             .andExpect(jsonPath("$.graffitiPhotos", hasSize(0)))
             .andExpect(jsonPath("$.graffitiMetadata").isArray())
             .andExpect(jsonPath("$.graffitiMetadata", hasSize(0)));
+    }
+    
+    @Test
+    public void testUploadGraffitiPhotoWithInvalidFile() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "test.txt",
+            "text/plain",
+            "not an image".getBytes()
+        );
+        
+        mockMvc.perform(multipart("/api/uploadGraffitiPhoto")
+                .file(file))
+            .andExpect(status().isBadRequest());
+    }
+    
+    @Test
+    public void testAddGraffitiDataWithInvalidCoordinates() throws Exception {
+        // First upload a photo
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "test-photo.jpg",
+            MediaType.IMAGE_JPEG_VALUE,
+            "test image content".getBytes()
+        );
+        
+        MvcResult uploadResult = mockMvc.perform(multipart("/api/uploadGraffitiPhoto")
+                .file(file))
+            .andExpect(status().isOk())
+            .andReturn();
+        
+        String uploadResponse = uploadResult.getResponse().getContentAsString();
+        Long photoId = objectMapper.readTree(uploadResponse).get("photoId").asLong();
+        
+        GraffitiDataRequest request = new GraffitiDataRequest(
+            "Street Art",
+            photoId,
+            "urban,colorful",
+            91.0, // Invalid latitude > 90
+            -74.0060,
+            10.5
+        );
+        
+        mockMvc.perform(post("/api/add-graffiti-data")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest());
     }
 }

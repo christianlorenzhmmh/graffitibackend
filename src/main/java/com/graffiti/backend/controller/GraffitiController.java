@@ -22,6 +22,15 @@ public class GraffitiController {
     public ResponseEntity<PhotoUploadResponse> uploadGraffitiPhoto(
             @RequestParam("file") MultipartFile file) {
         try {
+            if (file == null || file.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest().build();
+            }
+            
             Long photoId = graffitiService.uploadPhoto(file);
             return ResponseEntity.ok(new PhotoUploadResponse(photoId));
         } catch (Exception e) {
@@ -33,6 +42,22 @@ public class GraffitiController {
     public ResponseEntity<GraffitiData> addGraffitiData(
             @RequestBody GraffitiDataRequest request) {
         try {
+            if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            if (request.getPhotoId() == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            if (request.getLatitude() != null && (request.getLatitude() < -90 || request.getLatitude() > 90)) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            if (request.getLongitude() != null && (request.getLongitude() < -180 || request.getLongitude() > 180)) {
+                return ResponseEntity.badRequest().build();
+            }
+            
             GraffitiData savedData = graffitiService.addGraffitiData(request);
             return ResponseEntity.ok(savedData);
         } catch (Exception e) {

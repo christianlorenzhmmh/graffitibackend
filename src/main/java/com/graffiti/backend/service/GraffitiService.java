@@ -33,9 +33,12 @@ public class GraffitiService {
     }
     
     public GraffitiData addGraffitiData(GraffitiDataRequest request) {
+        GraffitiPhoto photo = photoRepository.findById(request.getPhotoId())
+            .orElseThrow(() -> new RuntimeException("Photo not found with id: " + request.getPhotoId()));
+        
         GraffitiData data = new GraffitiData(
             request.getTitle(),
-            request.getPhotoId(),
+            photo,
             request.getTags(),
             request.getLatitude(),
             request.getLongitude(),
@@ -48,12 +51,13 @@ public class GraffitiService {
         List<GraffitiPhoto> photos = photoRepository.findAll();
         List<GraffitiData> dataList = dataRepository.findAll();
         
-        List<GraffitiPhotoDTO> photoDTOs = photos.stream()
-            .map(p -> new GraffitiPhotoDTO(p.getId(), p.getFileName(), p.getContentType(), p.getPhotoData()))
+        List<GraffitiPhotoSummaryDTO> photoDTOs = photos.stream()
+            .map(p -> new GraffitiPhotoSummaryDTO(p.getId(), p.getFileName(), p.getContentType()))
             .collect(Collectors.toList());
         
         List<GraffitiMetadataDTO> metadataDTOs = dataList.stream()
-            .map(d -> new GraffitiMetadataDTO(d.getId(), d.getTitle(), d.getPhotoId(), d.getTags(), 
+            .map(d -> new GraffitiMetadataDTO(d.getId(), d.getTitle(), 
+                d.getPhoto() != null ? d.getPhoto().getId() : null, d.getTags(), 
                 d.getLatitude(), d.getLongitude(), d.getAltitude()))
             .collect(Collectors.toList());
         

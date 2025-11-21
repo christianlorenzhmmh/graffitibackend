@@ -13,8 +13,9 @@ public class GraffitiData {
     @Column(name = "title")
     private String title;
     
-    @Column(name = "photo_id")
-    private Long photoId;
+    @ManyToOne
+    @JoinColumn(name = "photo_id", referencedColumnName = "id")
+    private GraffitiPhoto photo;
     
     @Column(name = "tags")
     private String tags;
@@ -31,9 +32,9 @@ public class GraffitiData {
     public GraffitiData() {
     }
     
-    public GraffitiData(String title, Long photoId, String tags, Double latitude, Double longitude, Double altitude) {
+    public GraffitiData(String title, GraffitiPhoto photo, String tags, Double latitude, Double longitude, Double altitude) {
         this.title = title;
-        this.photoId = photoId;
+        this.photo = photo;
         this.tags = tags;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -56,12 +57,12 @@ public class GraffitiData {
         this.title = title;
     }
     
-    public Long getPhotoId() {
-        return photoId;
+    public GraffitiPhoto getPhoto() {
+        return photo;
     }
     
-    public void setPhotoId(Long photoId) {
-        this.photoId = photoId;
+    public void setPhoto(GraffitiPhoto photo) {
+        this.photo = photo;
     }
     
     public String getTags() {
