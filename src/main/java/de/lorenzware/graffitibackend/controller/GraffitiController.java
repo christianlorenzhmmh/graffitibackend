@@ -1,8 +1,8 @@
-package com.graffiti.backend.controller;
+package de.lorenzware.graffitibackend.controller;
 
-import com.graffiti.backend.dto.ApiResponse;
-import com.graffiti.backend.entity.Graffiti;
-import com.graffiti.backend.service.GraffitiService;
+import de.lorenzware.graffitibackend.dto.ApiResponse;
+import de.lorenzware.graffitibackend.entity.Graffiti;
+import de.lorenzware.graffitibackend.service.GraffitiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

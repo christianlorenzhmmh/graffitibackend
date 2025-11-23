@@ -1,6 +1,6 @@
-package com.graffiti.backend.exception;
+package de.lorenzware.graffitibackend.exception;
 
-import com.graffiti.backend.dto.ErrorResponse;
+import de.lorenzware.graffitibackend.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

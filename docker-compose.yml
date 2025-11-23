@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: graffiti-db
+    ports:
+      - '51099:5432'
+    environment:
+      - POSTGRES_USER=graffiti-user
+      - POSTGRES_PASSWORD=graffiti-password
+      - POSTGRES_DB=postgres

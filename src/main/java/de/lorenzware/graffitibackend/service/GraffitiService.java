@@ -1,8 +1,8 @@
-package com.graffiti.backend.service;
+package de.lorenzware.graffitibackend.service;
 
-import com.graffiti.backend.entity.Graffiti;
-import com.graffiti.backend.exception.ResourceNotFoundException;
-import com.graffiti.backend.repository.GraffitiRepository;
+import de.lorenzware.graffitibackend.entity.Graffiti;
+import de.lorenzware.graffitibackend.exception.ResourceNotFoundException;
+import de.lorenzware.graffitibackend.repository.GraffitiRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

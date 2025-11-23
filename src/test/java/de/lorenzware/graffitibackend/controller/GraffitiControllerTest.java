@@ -1,7 +1,7 @@
-package com.graffiti.backend.controller;
+package de.lorenzware.graffitibackend.controller;
 
-import com.graffiti.backend.entity.Graffiti;
-import com.graffiti.backend.service.GraffitiService;
+import de.lorenzware.graffitibackend.entity.Graffiti;
+import de.lorenzware.graffitibackend.service.GraffitiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;

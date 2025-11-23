@@ -1,4 +1,4 @@
-package com.graffiti.backend.controller;
+package de.lorenzware.graffitibackend.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;

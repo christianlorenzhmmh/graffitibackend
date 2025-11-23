@@ -1,4 +1,4 @@
-package com.graffiti.backend.controller;
+package de.lorenzware.graffitibackend.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,4 +22,5 @@ class HealthControllerTest {
                 .andExpect(jsonPath("$.status").value("ok"))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
+
 }
