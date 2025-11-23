@@ -1,4 +1,4 @@
-package com.graffiti.backend.dto;
+package de.lorenzware.graffitibackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
