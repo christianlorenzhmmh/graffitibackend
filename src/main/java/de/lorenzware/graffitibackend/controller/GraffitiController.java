@@ -30,6 +30,7 @@ public class GraffitiController {
             @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "latitude", required = false) BigDecimal latitude,
             @RequestParam(value = "longitude", required = false) BigDecimal longitude,
+            @RequestParam(value = "altitude", required = false) BigDecimal altitude,
             @RequestParam(value = "status", required = false, defaultValue = "reported") String status,
             @RequestParam(value = "photo", required = false) MultipartFile photo) throws IOException {
 
@@ -39,6 +40,7 @@ public class GraffitiController {
         graffiti.setLocation(location);
         graffiti.setLatitude(latitude);
         graffiti.setLongitude(longitude);
+        graffiti.setAltitude(altitude);
         graffiti.setStatus(status);
 
         Graffiti savedGraffiti = graffitiService.createGraffiti(graffiti, photo);

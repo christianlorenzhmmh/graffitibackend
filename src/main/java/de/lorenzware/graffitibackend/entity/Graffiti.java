@@ -36,6 +36,10 @@ public class Graffiti {
     @Column(precision = 11, scale = 8)
     private BigDecimal longitude;
 
+    @Column(precision = 7, scale = 8)
+    private BigDecimal altitude;
+
+
     @Column(name = "photo_path", length = 500)
     private String photoPath;
 

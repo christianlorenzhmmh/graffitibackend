@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS graffiti (
     location VARCHAR(500),
     latitude DECIMAL(10, 8),
     longitude DECIMAL(11, 8),
+    altitude DECIMAL(7, 2),
     photo_path VARCHAR(500),
     status VARCHAR(50) DEFAULT 'reported',
     created_at TIMESTAMP NOT NULL,
