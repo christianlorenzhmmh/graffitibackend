@@ -63,6 +63,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Google Cloud SQL Socket Factory for secure connections -->
+        <dependency>
+            <groupId>com.google.cloud.sql</groupId>
+            <artifactId>postgres-socket-factory</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+
         <!-- Spring Boot Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
