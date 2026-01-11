@@ -27,7 +27,7 @@ public class GraffitiController {
     public ResponseEntity<ApiResponse<Graffiti>> createGraffiti(
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "tag", required = false) String tag,
             @RequestParam(value = "latitude", required = false) BigDecimal latitude,
             @RequestParam(value = "longitude", required = false) BigDecimal longitude,
             @RequestParam(value = "altitude", required = false) BigDecimal altitude,
@@ -37,7 +37,7 @@ public class GraffitiController {
         Graffiti graffiti = new Graffiti();
         graffiti.setTitle(title);
         graffiti.setDescription(description);
-        graffiti.setLocation(location);
+        graffiti.setTag(tag);
         graffiti.setLatitude(latitude);
         graffiti.setLongitude(longitude);
         graffiti.setAltitude(altitude);
@@ -78,7 +78,7 @@ public class GraffitiController {
             @PathVariable Long id,
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "tag", required = false) String tag,
             @RequestParam(value = "latitude", required = false) BigDecimal latitude,
             @RequestParam(value = "longitude", required = false) BigDecimal longitude,
             @RequestParam(value = "status", required = false) String status,
@@ -87,7 +87,7 @@ public class GraffitiController {
         Graffiti graffiti = new Graffiti();
         graffiti.setTitle(title);
         graffiti.setDescription(description);
-        graffiti.setLocation(location);
+        graffiti.setTag(tag);
         graffiti.setLatitude(latitude);
         graffiti.setLongitude(longitude);
         graffiti.setStatus(status);

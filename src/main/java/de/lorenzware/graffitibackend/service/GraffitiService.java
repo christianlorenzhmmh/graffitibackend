@@ -64,8 +64,8 @@ public class GraffitiService {
         if (updatedGraffiti.getDescription() != null) {
             existingGraffiti.setDescription(updatedGraffiti.getDescription());
         }
-        if (updatedGraffiti.getLocation() != null) {
-            existingGraffiti.setLocation(updatedGraffiti.getLocation());
+        if (updatedGraffiti.getTag() != null) {
+            existingGraffiti.setTag(updatedGraffiti.getTag());
         }
         if (updatedGraffiti.getLatitude() != null) {
             existingGraffiti.setLatitude(updatedGraffiti.getLatitude());

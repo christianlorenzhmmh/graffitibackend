@@ -1,0 +1,1 @@
+ALTER TABLE graffiti RENAME COLUMN location TO tag;

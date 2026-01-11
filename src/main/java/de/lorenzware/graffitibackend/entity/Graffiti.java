@@ -28,7 +28,7 @@ public class Graffiti {
     private String description;
 
     @Column(length = 500)
-    private String location;
+    private String tag;
 
     @Column(precision = 10, scale = 8)
     private BigDecimal latitude;
