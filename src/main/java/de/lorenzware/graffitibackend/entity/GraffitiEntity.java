@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Graffiti {
+public class GraffitiEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,8 +43,8 @@ public class Graffiti {
     @Column(name = "photo_path", length = 500)
     private String photoPath;
 
-    @Column(length = 50)
-    private String status = "reported";
+//    @Column(length = 50)
+//    private String status = "reported";
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -56,9 +56,9 @@ public class Graffiti {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        if (status == null) {
-            status = "reported";
-        }
+//        if (status == null) {
+//            status = "reported";
+//        }
     }
 
     @PreUpdate

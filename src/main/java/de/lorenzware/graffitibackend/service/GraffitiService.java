@@ -1,15 +1,14 @@
 package de.lorenzware.graffitibackend.service;
 
-import de.lorenzware.graffitibackend.entity.Graffiti;
+import de.lorenzware.graffitibackend.converter.GraffitiConverter;
+import de.lorenzware.graffitibackend.dto.GraffitiDto;
+import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;
+import de.lorenzware.graffitibackend.entity.GraffitiEntity;
 import de.lorenzware.graffitibackend.exception.ResourceNotFoundException;
 import de.lorenzware.graffitibackend.repository.GraffitiRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
+
+import static de.lorenzware.graffitibackend.dto.LoadGraffitiResponse.RESPONSE_CODE_MORE_THAN_MAX;
 
 @Service
 @RequiredArgsConstructor
@@ -28,78 +30,82 @@ public class GraffitiService {
 
     private final GraffitiRepository graffitiRepository;
 
+    private final GraffitiConverter graffitiConverter;
+
+
+
     @Value("${file.upload-dir:uploads}")
     private String uploadDir;
 
     @Transactional
-    public Graffiti createGraffiti(Graffiti graffiti, MultipartFile photo) throws IOException {
+    public GraffitiEntity createGraffiti(GraffitiEntity graffitiEntity, MultipartFile photo) throws IOException {
         if (photo != null && !photo.isEmpty()) {
             String photoPath = savePhoto(photo);
-            graffiti.setPhotoPath(photoPath);
+            graffitiEntity.setPhotoPath(photoPath);
         }
-        return graffitiRepository.save(graffiti);
+        return graffitiRepository.save(graffitiEntity);
     }
 
-    public Page<Graffiti> getAllGraffiti(String status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        
-        if (status != null && !status.isEmpty()) {
-            return graffitiRepository.findByStatus(status, pageable);
-        }
-        return graffitiRepository.findAll(pageable);
-    }
+//    public Page<Graffiti> getAllGraffiti(String status, int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+//
+//        if (status != null && !status.isEmpty()) {
+//            return graffitiRepository.findByStatus(status, pageable);
+//        }
+//        return graffitiRepository.findAll(pageable);
+//    }
 
-    public Graffiti getGraffitiById(Long id) {
+    public GraffitiEntity getGraffitiById(Long id) {
         return graffitiRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Graffiti entry not found with id: " + id));
     }
 
     @Transactional
-    public Graffiti updateGraffiti(Long id, Graffiti updatedGraffiti, MultipartFile photo) throws IOException {
-        Graffiti existingGraffiti = getGraffitiById(id);
+    public GraffitiEntity updateGraffiti(Long id, GraffitiEntity updatedGraffitiEntity, MultipartFile photo) throws IOException {
+        GraffitiEntity existingGraffitiEntity = getGraffitiById(id);
 
-        if (updatedGraffiti.getTitle() != null) {
-            existingGraffiti.setTitle(updatedGraffiti.getTitle());
+        if (updatedGraffitiEntity.getTitle() != null) {
+            existingGraffitiEntity.setTitle(updatedGraffitiEntity.getTitle());
         }
-        if (updatedGraffiti.getDescription() != null) {
-            existingGraffiti.setDescription(updatedGraffiti.getDescription());
+        if (updatedGraffitiEntity.getDescription() != null) {
+            existingGraffitiEntity.setDescription(updatedGraffitiEntity.getDescription());
         }
-        if (updatedGraffiti.getTag() != null) {
-            existingGraffiti.setTag(updatedGraffiti.getTag());
+        if (updatedGraffitiEntity.getTag() != null) {
+            existingGraffitiEntity.setTag(updatedGraffitiEntity.getTag());
         }
-        if (updatedGraffiti.getLatitude() != null) {
-            existingGraffiti.setLatitude(updatedGraffiti.getLatitude());
+        if (updatedGraffitiEntity.getLatitude() != null) {
+            existingGraffitiEntity.setLatitude(updatedGraffitiEntity.getLatitude());
         }
-        if (updatedGraffiti.getLongitude() != null) {
-            existingGraffiti.setLongitude(updatedGraffiti.getLongitude());
+        if (updatedGraffitiEntity.getLongitude() != null) {
+            existingGraffitiEntity.setLongitude(updatedGraffitiEntity.getLongitude());
         }
-        if (updatedGraffiti.getStatus() != null) {
-            existingGraffiti.setStatus(updatedGraffiti.getStatus());
-        }
+//        if (updatedGraffiti.getStatus() != null) {
+//            existingGraffiti.setStatus(updatedGraffiti.getStatus());
+//        }
 
         if (photo != null && !photo.isEmpty()) {
             // Delete old photo if exists
-            if (existingGraffiti.getPhotoPath() != null) {
-                deletePhoto(existingGraffiti.getPhotoPath());
+            if (existingGraffitiEntity.getPhotoPath() != null) {
+                deletePhoto(existingGraffitiEntity.getPhotoPath());
             }
             // Save new photo
             String photoPath = savePhoto(photo);
-            existingGraffiti.setPhotoPath(photoPath);
+            existingGraffitiEntity.setPhotoPath(photoPath);
         }
 
-        return graffitiRepository.save(existingGraffiti);
+        return graffitiRepository.save(existingGraffitiEntity);
     }
 
     @Transactional
     public void deleteGraffiti(Long id) {
-        Graffiti graffiti = getGraffitiById(id);
+        GraffitiEntity graffitiEntity = getGraffitiById(id);
         
         // Delete photo file if exists
-        if (graffiti.getPhotoPath() != null) {
-            deletePhoto(graffiti.getPhotoPath());
+        if (graffitiEntity.getPhotoPath() != null) {
+            deletePhoto(graffitiEntity.getPhotoPath());
         }
         
-        graffitiRepository.delete(graffiti);
+        graffitiRepository.delete(graffitiEntity);
     }
 
     private String savePhoto(MultipartFile photo) throws IOException {
@@ -134,5 +140,26 @@ public class GraffitiService {
             // Log error but don't fail the operation
             log.error("Error deleting photo: {}", e.getMessage(), e);
         }
+    }
+
+    public LoadGraffitiResponse loadGraffitiInArea(
+            double upperLeftLat, double upperLeftLon,
+            double lowerRightLat, double lowerRightLon,
+            int max) throws IOException {
+
+        List<GraffitiEntity> graffitiEntityList = graffitiRepository.findGraffitiInRectangle(
+                Math.min(upperLeftLat, lowerRightLat),
+                Math.max(upperLeftLat, lowerRightLat),
+                Math.min(upperLeftLon, lowerRightLon),
+                Math.max(upperLeftLon, lowerRightLon),
+                max
+        );
+
+        int responseCode = LoadGraffitiResponse.RESPONSE_CODE_OK;
+        if (graffitiEntityList.isEmpty()) responseCode = LoadGraffitiResponse.RESPONSE_CODE_EMPTY;
+        else if (graffitiEntityList.size() > max) responseCode = RESPONSE_CODE_MORE_THAN_MAX;
+
+        List<GraffitiDto> dtoList = graffitiConverter.toDtoList(graffitiEntityList);
+        return new LoadGraffitiResponse(responseCode, dtoList);
     }
 }

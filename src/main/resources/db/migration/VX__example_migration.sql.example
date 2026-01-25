@@ -1,5 +1,5 @@
 -- Example migration file
--- This demonstrates how to add a new column to the graffiti table
+-- This demonstrates how to add a new column to the graffitiEntity table
 -- To use this migration:
 -- 1. Rename this file to V2__Add_example_column.sql
 -- 2. Uncomment the SQL below

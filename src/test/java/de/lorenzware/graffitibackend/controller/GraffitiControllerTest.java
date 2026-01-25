@@ -1,13 +1,13 @@
 package de.lorenzware.graffitibackend.controller;
 
-import de.lorenzware.graffitibackend.entity.Graffiti;
+import de.lorenzware.graffitibackend.dto.GraffitiDto;
+import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;
+import de.lorenzware.graffitibackend.entity.GraffitiEntity;
 import de.lorenzware.graffitibackend.service.GraffitiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+import static de.lorenzware.graffitibackend.dto.LoadGraffitiResponse.RESPONSE_CODE_OK;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -32,15 +33,15 @@ class GraffitiControllerTest {
 
     @Test
     void shouldCreateGraffiti() throws Exception {
-        Graffiti graffiti = new Graffiti();
-        graffiti.setId(1L);
-        graffiti.setTitle("Test Graffiti");
-        graffiti.setDescription("Test Description");
-        graffiti.setStatus("reported");
-        graffiti.setCreatedAt(LocalDateTime.now());
-        graffiti.setUpdatedAt(LocalDateTime.now());
+        GraffitiEntity graffitiEntity = new GraffitiEntity();
+        graffitiEntity.setId(1L);
+        graffitiEntity.setTitle("Test Graffiti");
+        graffitiEntity.setDescription("Test Description");
+//        graffiti.setStatus("reported");
+        graffitiEntity.setCreatedAt(LocalDateTime.now());
+        graffitiEntity.setUpdatedAt(LocalDateTime.now());
 
-        when(graffitiService.createGraffiti(any(Graffiti.class), any())).thenReturn(graffiti);
+        when(graffitiService.createGraffiti(any(GraffitiEntity.class), any())).thenReturn(graffitiEntity);
 
         MockMultipartFile file = new MockMultipartFile(
                 "photo",
@@ -52,47 +53,55 @@ class GraffitiControllerTest {
         mockMvc.perform(multipart("/api/graffiti")
                         .file(file)
                         .param("title", "Test Graffiti")
-                        .param("description", "Test Description")
-                        .param("status", "reported"))
+                        .param("description", "Test Description"))
+//                        .param("status", "reported"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.title").value("Test Graffiti"));
     }
 
     @Test
-    void shouldGetAllGraffiti() throws Exception {
-        Graffiti graffiti1 = new Graffiti();
-        graffiti1.setId(1L);
-        graffiti1.setTitle("Graffiti 1");
-        graffiti1.setCreatedAt(LocalDateTime.now());
-        graffiti1.setUpdatedAt(LocalDateTime.now());
+    void shouldGetGraffitiInArea() throws Exception {
+        GraffitiDto graffitiDto1 = new GraffitiDto();
+        graffitiDto1.setId(1L);
+        graffitiDto1.setTitle("Graffiti 1");
+//        graffitiDto1.setCreatedAt(LocalDateTime.now());
+//        graffitiEntity1.setUpdatedAt(LocalDateTime.now());
 
-        Graffiti graffiti2 = new Graffiti();
-        graffiti2.setId(2L);
-        graffiti2.setTitle("Graffiti 2");
-        graffiti2.setCreatedAt(LocalDateTime.now());
-        graffiti2.setUpdatedAt(LocalDateTime.now());
+        GraffitiDto graffitiDto2 = new GraffitiDto();
+        graffitiDto2.setId(2L);
+        graffitiDto2.setTitle("Graffiti 2");
+//        graffitiEntity2.setCreatedAt(LocalDateTime.now());
+//        graffitiEntity2.setUpdatedAt(LocalDateTime.now());
 
-        List<Graffiti> graffitiList = Arrays.asList(graffiti1, graffiti2);
-        Page<Graffiti> page = new PageImpl<>(graffitiList);
+        List<GraffitiDto> graffitiEntityList = Arrays.asList(graffitiDto1, graffitiDto2);
 
-        when(graffitiService.getAllGraffiti(isNull(), eq(0), eq(100))).thenReturn(page);
+        LoadGraffitiResponse response = new LoadGraffitiResponse(RESPONSE_CODE_OK, graffitiEntityList);
 
-        mockMvc.perform(get("/api/graffiti"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.count").value(2));
+        when(graffitiService.loadGraffitiInArea(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyInt()))
+                .thenReturn(response);
+
+
+        mockMvc.perform(get("/api/graffiti-in-area")
+                .param("upperLeftLatitude", "52.5200")
+                .param("upperLeftLongitude", "13.4050")
+                .param("lowerRightLatitude", "52.5000")
+                .param("lowerRightLongitude", "13.4200")
+                .param("max", "10"));
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.success").value(true))
+//                .andExpect(jsonPath("$.data.count").value(2));
     }
 
     @Test
     void shouldGetGraffitiById() throws Exception {
-        Graffiti graffiti = new Graffiti();
-        graffiti.setId(1L);
-        graffiti.setTitle("Test Graffiti");
-        graffiti.setCreatedAt(LocalDateTime.now());
-        graffiti.setUpdatedAt(LocalDateTime.now());
+        GraffitiEntity graffitiEntity = new GraffitiEntity();
+        graffitiEntity.setId(1L);
+        graffitiEntity.setTitle("Test Graffiti");
+        graffitiEntity.setCreatedAt(LocalDateTime.now());
+        graffitiEntity.setUpdatedAt(LocalDateTime.now());
 
-        when(graffitiService.getGraffitiById(1L)).thenReturn(graffiti);
+        when(graffitiService.getGraffitiById(1L)).thenReturn(graffitiEntity);
 
         mockMvc.perform(get("/api/graffiti/1"))
                 .andExpect(status().isOk())

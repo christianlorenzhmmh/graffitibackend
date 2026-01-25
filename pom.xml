@@ -16,7 +16,7 @@
     <artifactId>graffitibackend</artifactId>
     <version>1.0.0</version>
     <name>Graffiti Backend</name>
-    <description>Backend API for graffiti tracking with PostgreSQL and photo uploads</description>
+    <description>Backend API for graffitiEntity tracking with PostgreSQL and photo uploads</description>
 
     <properties>
         <java.version>17</java.version>
