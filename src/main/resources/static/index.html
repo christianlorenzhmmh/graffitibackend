@@ -54,9 +54,9 @@
 </div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    // Startposition (z.B. Berlin)
-    const START_LAT = 52.52;
-    const START_LON = 13.405;
+    // Startposition (z.B. Ritterhude
+    const START_LAT = 53.20;
+    const START_LON = 8.749;
     const START_ZOOM = 13;
 
     // Karte initialisieren
@@ -110,20 +110,20 @@
         try {
             const response = await fetch(url);
             const data = await response.json();
-            if (data && data.graffitiEntities && data.graffitiEntities.length > 0) {
-                graffitiEntities = data.graffitiEntities;
-                data.graffitiEntities.forEach((g, idx) => {
+            if (data && data.graffitiList && data.graffitiList.length > 0) {
+                graffitiEntities = data.graffitiList;
+                graffitiEntities.forEach((g, idx) => {
                     if (g.latitude && g.longitude) {
                         const marker = L.marker([g.latitude, g.longitude])
                             .addTo(map)
-                            .bindPopup(`#${idx+1}: ${g.title || ''}`)
-                            .bindTooltip(`${idx+1}`, {permanent: true, direction: 'top'});
+                            .bindPopup(`#${idx}: ${g.title || ''}`)
+                            .bindTooltip(`${idx}`, {permanent: true, direction: 'top'});
                         marker.on('click', () => showGraffitiDetails(g, idx));
                         markers.push(marker);
                     }
                 });
             } else {
-                alert('Keine Graffiti gefunden!');
+                alert('Keine Graffiti gefunden! data:' + JSON.stringify(data));
             }
         } catch (e) {
             alert('Fehler beim Laden der Graffiti!');
