@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Graffiti Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body, html { height: 100%; margin: 0; padding: 0; }
+        #container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+        #map {
+            height: 100vh;
+            width: 50vw;
+        }
+        #details {
+            width: 50vw;
+            height: 100vh;
+            box-sizing: border-box;
+            padding: 24px 16px;
+            border-left: 1px solid #ccc;
+            background: #fafafa;
+            overflow-y: auto;
+        }
+        #showBtn { margin: 10px; }
+        .graffiti-photo {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+            margin-bottom: 16px;
+        }
+        .graffiti-label {
+            font-weight: bold;
+        }
+        .graffiti-value {
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+<h2 style="margin-left:16px;">Graffiti Map</h2>
+<div id="container">
+    <div style="display:flex; flex-direction:column; width:50vw;">
+        <button id="showBtn">Show graffiti in area</button>
+        <div id="map"></div>
+    </div>
+    <div id="details">
+        <div id="graffitiDetailsPlaceholder">Bitte auf einen Marker klicken, um Details anzuzeigen.</div>
+        <div id="graffitiDetails" style="display:none;"></div>
+    </div>
+</div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Startposition (z.B. Berlin)
+    const START_LAT = 52.52;
+    const START_LON = 13.405;
+    const START_ZOOM = 13;
+
+    // Karte initialisieren
+    const map = L.map('map').setView([START_LAT, START_LON], START_ZOOM);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let markers = [];
+    let graffitiEntities = [];
+
+    function showGraffitiDetails(graffiti, idx) {
+        const detailsDiv = document.getElementById('graffitiDetails');
+        const placeholder = document.getElementById('graffitiDetailsPlaceholder');
+        placeholder.style.display = 'none';
+        detailsDiv.style.display = 'block';
+        let html = '';
+        if (graffiti.photoPath) {
+            html += `<img class="graffiti-photo" src="${graffiti.photoPath}" alt="Graffiti Photo" />`;
+        }
+        html += `<div class="graffiti-label">#${idx+1} ${graffiti.title ? graffiti.title : ''}</div>`;
+        if (graffiti.description) {
+            html += `<div class="graffiti-value">${graffiti.description}</div>`;
+        }
+        if (graffiti.tag) {
+            html += `<div class="graffiti-label">Tag:</div><div class="graffiti-value">${graffiti.tag}</div>`;
+        }
+        html += `<div class="graffiti-label">Koordinaten:</div><div class="graffiti-value">${graffiti.latitude}, ${graffiti.longitude}</div>`;
+        detailsDiv.innerHTML = html;
+    }
+
+    document.getElementById('showBtn').onclick = async function() {
+        // Marker entfernen
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        graffitiEntities = [];
+        document.getElementById('graffitiDetails').style.display = 'none';
+        document.getElementById('graffitiDetailsPlaceholder').style.display = 'block';
+
+        // Kartengrenzen holen
+        const bounds = map.getBounds();
+        const upperLeftLat = bounds.getNorthWest().lat;
+        const upperLeftLon = bounds.getNorthWest().lng;
+        const lowerRightLat = bounds.getSouthEast().lat;
+        const lowerRightLon = bounds.getSouthEast().lng;
+        const max = 100;
+
+        // API-Request
+        const url = `/api/graffiti-in-area?upperLeftLatitude=${upperLeftLat}&upperLeftLongitude=${upperLeftLon}&lowerRightLatitude=${lowerRightLat}&lowerRightLongitude=${lowerRightLon}&max=${max}`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data && data.graffitiEntities && data.graffitiEntities.length > 0) {
+                graffitiEntities = data.graffitiEntities;
+                data.graffitiEntities.forEach((g, idx) => {
+                    if (g.latitude && g.longitude) {
+                        const marker = L.marker([g.latitude, g.longitude])
+                            .addTo(map)
+                            .bindPopup(`#${idx+1}: ${g.title || ''}`)
+                            .bindTooltip(`${idx+1}`, {permanent: true, direction: 'top'});
+                        marker.on('click', () => showGraffitiDetails(g, idx));
+                        markers.push(marker);
+                    }
+                });
+            } else {
+                alert('Keine Graffiti gefunden!');
+            }
+        } catch (e) {
+            alert('Fehler beim Laden der Graffiti!');
+        }
+    };
+</script>
+</body>
+</html>
+
