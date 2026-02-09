@@ -9,19 +9,20 @@ import java.util.List;
 
 @Component
 public class GraffitiConverter {
-    public GraffitiDto toDto(GraffitiEntity entity) {
-        if (entity == null) {
+    public GraffitiDto toDto(GraffitiEntity ge) {
+        if (ge == null) {
             return null;
         }
+        String tagValue = ge.getTag() != null ? ge.getTag().getValue() : null;
         return new GraffitiDto(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getTag(),
-                entity.getLatitude().toString(),
-                entity.getLongitude().toString(),
-                entity.getAltitude().toString(),
-                entity.getPhotoPath()
+                ge.getId(),
+                ge.getTitle(),
+                ge.getDescription(),
+                tagValue,
+                ge.getLatitude() != null ? ge.getLatitude().toString() : null,
+                ge.getLongitude() != null ? ge.getLongitude().toString() : null,
+                ge.getAltitude() != null ? ge.getAltitude().toString() : null,
+                ge.getPhotoPath()
         );
     }
 

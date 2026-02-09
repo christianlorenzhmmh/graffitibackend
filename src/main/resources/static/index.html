@@ -50,6 +50,7 @@
     <div id="details">
         <div id="graffitiDetailsPlaceholder">Bitte auf einen Marker klicken, um Details anzuzeigen.</div>
         <div id="graffitiDetails" style="display:none;"></div>
+        <div id="tagTableContainer" style="margin-top:32px;"></div>
     </div>
 </div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -68,6 +69,7 @@
 
     let markers = [];
     let graffitiEntities = [];
+    let tagCounts = [];
 
     function showGraffitiDetails(graffiti, idx) {
         const detailsDiv = document.getElementById('graffitiDetails');
@@ -78,7 +80,7 @@
         if (graffiti.photoPath) {
             html += `<img class="graffiti-photo" src="${graffiti.photoPath}" alt="Graffiti Photo" />`;
         }
-        html += `<div class="graffiti-label">#${idx+1} ${graffiti.title ? graffiti.title : ''}</div>`;
+        html += `<div class="graffiti-label">#${idx} ${graffiti.title ? graffiti.title : ''}</div>`;
         if (graffiti.description) {
             html += `<div class="graffiti-value">${graffiti.description}</div>`;
         }
@@ -89,13 +91,30 @@
         detailsDiv.innerHTML = html;
     }
 
+    function renderTagTable() {
+        const container = document.getElementById('tagTableContainer');
+        if (!tagCounts || tagCounts.length === 0) {
+            container.innerHTML = '<b>Keine Tags im Bereich gefunden.</b>';
+            return;
+        }
+        let html = '<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;background:#fff;">';
+        html += '<tr style="background:#eee;"><th>Tag</th><th>Anzahl</th></tr>';
+        tagCounts.forEach(tc => {
+            html += `<tr><td>${tc.tagValue}</td><td>${tc.count}</td></tr>`;
+        });
+        html += '</table>';
+        container.innerHTML = html;
+    }
+
     document.getElementById('showBtn').onclick = async function() {
         // Marker entfernen
         markers.forEach(m => map.removeLayer(m));
         markers = [];
         graffitiEntities = [];
+        tagCounts = [];
         document.getElementById('graffitiDetails').style.display = 'none';
         document.getElementById('graffitiDetailsPlaceholder').style.display = 'block';
+        document.getElementById('tagTableContainer').innerHTML = '';
 
         // Kartengrenzen holen
         const bounds = map.getBounds();
@@ -112,20 +131,24 @@
             const data = await response.json();
             if (data && data.graffitiList && data.graffitiList.length > 0) {
                 graffitiEntities = data.graffitiList;
+                tagCounts = data.tagCounts || [];
                 graffitiEntities.forEach((g, idx) => {
                     if (g.latitude && g.longitude) {
                         const marker = L.marker([g.latitude, g.longitude])
                             .addTo(map)
-                            .bindPopup(`#${idx}: ${g.title || ''}`)
+                            .bindPopup(`#${idx}: ${g.tag || ''}`)
                             .bindTooltip(`${idx}`, {permanent: true, direction: 'top'});
                         marker.on('click', () => showGraffitiDetails(g, idx));
                         markers.push(marker);
                     }
                 });
+                renderTagTable();
             } else {
+                document.getElementById('tagTableContainer').innerHTML = '<b>Keine Graffiti gefunden!</b>';
                 alert('Keine Graffiti gefunden! data:' + JSON.stringify(data));
             }
         } catch (e) {
+            document.getElementById('tagTableContainer').innerHTML = '<b>Fehler beim Laden der Graffiti!</b>';
             alert('Fehler beim Laden der Graffiti!');
         }
     };

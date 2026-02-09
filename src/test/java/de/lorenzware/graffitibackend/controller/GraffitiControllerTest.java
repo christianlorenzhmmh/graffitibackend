@@ -5,6 +5,7 @@ import de.lorenzware.graffitibackend.dto.GraffitiDto;
 import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;
 import de.lorenzware.graffitibackend.entity.GraffitiEntity;
 import de.lorenzware.graffitibackend.service.GraffitiService;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -42,7 +43,9 @@ class GraffitiControllerTest {
         graffitiEntity.setCreatedAt(LocalDateTime.now());
         graffitiEntity.setUpdatedAt(LocalDateTime.now());
 
-        when(graffitiService.createGraffiti(any(GraffitiEntity.class), any())).thenReturn(graffitiEntity);
+        String newTagValue = "tag";
+
+        when(graffitiService.createGraffiti(any(GraffitiEntity.class), anyString(), any())).thenReturn(graffitiEntity);
 
         MockMultipartFile file = new MockMultipartFile(
                 "photo",
@@ -54,8 +57,8 @@ class GraffitiControllerTest {
         mockMvc.perform(multipart("/api/graffiti")
                         .file(file)
                         .param("title", "Test Graffiti")
-                        .param("description", "Test Description"))
-//                        .param("status", "reported"))
+                        .param("description", "Test Description")
+                        .param("tag", "newTag"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.title").value("Test Graffiti"));
@@ -77,7 +80,7 @@ class GraffitiControllerTest {
 
         List<GraffitiDto> graffitiEntityList = Arrays.asList(graffitiDto1, graffitiDto2);
 
-        LoadGraffitiResponse response = new LoadGraffitiResponse(RESPONSE_CODE_OK, graffitiEntityList);
+        LoadGraffitiResponse response = new LoadGraffitiResponse(RESPONSE_CODE_OK, graffitiEntityList, Lists.emptyList());
 
         when(graffitiService.loadGraffitiInArea(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyInt()))
                 .thenReturn(response);

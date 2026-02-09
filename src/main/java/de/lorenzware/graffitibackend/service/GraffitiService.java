@@ -3,9 +3,12 @@ package de.lorenzware.graffitibackend.service;
 import de.lorenzware.graffitibackend.converter.GraffitiConverter;
 import de.lorenzware.graffitibackend.dto.GraffitiDto;
 import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;
+import de.lorenzware.graffitibackend.dto.TagCountDto;
 import de.lorenzware.graffitibackend.entity.GraffitiEntity;
+import de.lorenzware.graffitibackend.entity.TagEntity;
 import de.lorenzware.graffitibackend.exception.ResourceNotFoundException;
 import de.lorenzware.graffitibackend.repository.GraffitiRepository;
+import de.lorenzware.graffitibackend.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +22,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static de.lorenzware.graffitibackend.dto.LoadGraffitiResponse.RESPONSE_CODE_MORE_THAN_MAX;
 
@@ -29,7 +34,7 @@ import static de.lorenzware.graffitibackend.dto.LoadGraffitiResponse.RESPONSE_CO
 public class GraffitiService {
 
     private final GraffitiRepository graffitiRepository;
-
+    private final TagRepository tagRepository;
     private final GraffitiConverter graffitiConverter;
 
 
@@ -38,7 +43,19 @@ public class GraffitiService {
     private String uploadDir;
 
     @Transactional
-    public GraffitiEntity createGraffiti(GraffitiEntity graffitiEntity, MultipartFile photo) throws IOException {
+    public GraffitiEntity createGraffiti(GraffitiEntity graffitiEntity, String tagValue, MultipartFile photo) throws IOException {
+        // TagEntity zuordnen oder neu anlegen
+        if (tagValue != null) {
+            TagEntity tagEntity = tagRepository.findByValue(tagValue)
+                    .orElseGet(() -> {
+                        TagEntity newTag = new TagEntity();
+                        newTag.setValue(tagValue);
+                        return tagRepository.save(newTag);
+                    });
+            graffitiEntity.setTag(tagEntity);
+        } else {
+            graffitiEntity.setTag(null);
+        }
         if (photo != null && !photo.isEmpty()) {
             String photoPath = savePhoto(photo);
             graffitiEntity.setPhotoPath(photoPath);
@@ -61,17 +78,22 @@ public class GraffitiService {
     }
 
     @Transactional
-    public GraffitiEntity updateGraffiti(Long id, GraffitiEntity updatedGraffitiEntity, MultipartFile photo) throws IOException {
+    public GraffitiEntity updateGraffiti(Long id, GraffitiEntity updatedGraffitiEntity, String tagValue, MultipartFile photo) throws IOException {
         GraffitiEntity existingGraffitiEntity = getGraffitiById(id);
-
         if (updatedGraffitiEntity.getTitle() != null) {
             existingGraffitiEntity.setTitle(updatedGraffitiEntity.getTitle());
         }
         if (updatedGraffitiEntity.getDescription() != null) {
             existingGraffitiEntity.setDescription(updatedGraffitiEntity.getDescription());
         }
-        if (updatedGraffitiEntity.getTag() != null) {
-            existingGraffitiEntity.setTag(updatedGraffitiEntity.getTag());
+        if (tagValue != null) {
+            TagEntity tagEntity = tagRepository.findByValue(tagValue)
+                    .orElseGet(() -> {
+                        TagEntity newTag = new TagEntity();
+                        newTag.setValue(tagValue);
+                        return tagRepository.save(newTag);
+                    });
+            existingGraffitiEntity.setTag(tagEntity);
         }
         if (updatedGraffitiEntity.getLatitude() != null) {
             existingGraffitiEntity.setLatitude(updatedGraffitiEntity.getLatitude());
@@ -145,7 +167,7 @@ public class GraffitiService {
     public LoadGraffitiResponse loadGraffitiInArea(
             double upperLeftLat, double upperLeftLon,
             double lowerRightLat, double lowerRightLon,
-            int max) throws IOException {
+            int max) {
 
         List<GraffitiEntity> graffitiEntityList = graffitiRepository.findGraffitiInRectangle(
                 Math.min(upperLeftLat, lowerRightLat),
@@ -160,6 +182,15 @@ public class GraffitiService {
         else if (graffitiEntityList.size() > max) responseCode = RESPONSE_CODE_MORE_THAN_MAX;
 
         List<GraffitiDto> dtoList = graffitiConverter.toDtoList(graffitiEntityList);
-        return new LoadGraffitiResponse(responseCode, dtoList);
+
+        // TagCounts berechnen
+        Map<String, Long> tagCountMap = graffitiEntityList.stream()
+                .filter(g -> g.getTag() != null && g.getTag().getValue() != null)
+                .collect(Collectors.groupingBy(g -> g.getTag().getValue(), Collectors.counting()));
+        List<TagCountDto> tagCounts = tagCountMap.entrySet().stream()
+                .map(e -> new TagCountDto(e.getKey(), e.getValue().intValue()))
+                .collect(Collectors.toList());
+
+        return new LoadGraffitiResponse(responseCode, dtoList, tagCounts);
     }
 }

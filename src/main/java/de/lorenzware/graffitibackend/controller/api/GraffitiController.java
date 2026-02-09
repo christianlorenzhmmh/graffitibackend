@@ -3,6 +3,7 @@ package de.lorenzware.graffitibackend.controller.api;
 import de.lorenzware.graffitibackend.dto.ApiResponse;
 import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;
 import de.lorenzware.graffitibackend.entity.GraffitiEntity;
+import de.lorenzware.graffitibackend.entity.TagEntity;
 import de.lorenzware.graffitibackend.service.GraffitiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class GraffitiController {
     public ResponseEntity<ApiResponse<GraffitiEntity>> createGraffiti(
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "tag", required = false) String tag,
+            @RequestParam(value = "tag", required = false) String tagValue,
             @RequestParam(value = "latitude", required = false) BigDecimal latitude,
             @RequestParam(value = "longitude", required = false) BigDecimal longitude,
             @RequestParam(value = "altitude", required = false) BigDecimal altitude,
@@ -36,13 +37,19 @@ public class GraffitiController {
         GraffitiEntity graffitiEntity = new GraffitiEntity();
         graffitiEntity.setTitle(title);
         graffitiEntity.setDescription(description);
-        graffitiEntity.setTag(tag);
+//        if (tag != null && !tag.isEmpty()) {
+//            TagEntity tagEntity = new TagEntity();
+//            tagEntity.setValue(tag);
+//            graffitiEntity.setTag(tagEntity);
+//        } else {
+//            graffitiEntity.setTag(null);
+//        }
         graffitiEntity.setLatitude(latitude);
         graffitiEntity.setLongitude(longitude);
         graffitiEntity.setAltitude(altitude);
 //        graffiti.setStatus(status);
 
-        GraffitiEntity savedGraffitiEntity = graffitiService.createGraffiti(graffitiEntity, photo);
+        GraffitiEntity savedGraffitiEntity = graffitiService.createGraffiti(graffitiEntity, tagValue, photo);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(true, savedGraffitiEntity));
@@ -95,7 +102,7 @@ public class GraffitiController {
             @PathVariable Long id,
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "tag", required = false) String tag,
+            @RequestParam(value = "tag", required = false) String tagValue,
             @RequestParam(value = "latitude", required = false) BigDecimal latitude,
             @RequestParam(value = "longitude", required = false) BigDecimal longitude,
 //            @RequestParam(value = "status", required = false) String status,
@@ -104,12 +111,12 @@ public class GraffitiController {
         GraffitiEntity graffitiEntity = new GraffitiEntity();
         graffitiEntity.setTitle(title);
         graffitiEntity.setDescription(description);
-        graffitiEntity.setTag(tag);
+//        graffitiEntity.setTag(tag);
         graffitiEntity.setLatitude(latitude);
         graffitiEntity.setLongitude(longitude);
 //        graffiti.setStatus(status);
 
-        GraffitiEntity updatedGraffitiEntity = graffitiService.updateGraffiti(id, graffitiEntity, photo);
+        GraffitiEntity updatedGraffitiEntity = graffitiService.updateGraffiti(id, graffitiEntity, tagValue, photo);
         return ResponseEntity.ok(new ApiResponse<>(true, updatedGraffitiEntity));
     }
 

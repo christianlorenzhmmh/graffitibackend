@@ -27,8 +27,9 @@ public class GraffitiEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 500)
-    private String tag;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_id")
+    private TagEntity tag;
 
     @Column(precision = 10, scale = 8)
     private BigDecimal latitude;
