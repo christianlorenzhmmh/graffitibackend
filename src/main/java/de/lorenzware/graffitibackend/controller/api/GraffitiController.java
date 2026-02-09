@@ -1,4 +1,4 @@
-package de.lorenzware.graffitibackend.controller;
+package de.lorenzware.graffitibackend.controller.api;
 
 import de.lorenzware.graffitibackend.dto.ApiResponse;
 import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;

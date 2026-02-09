@@ -1,5 +1,6 @@
 package de.lorenzware.graffitibackend.controller;
 
+import de.lorenzware.graffitibackend.controller.api.GraffitiController;
 import de.lorenzware.graffitibackend.dto.GraffitiDto;
 import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;
 import de.lorenzware.graffitibackend.entity.GraffitiEntity;
