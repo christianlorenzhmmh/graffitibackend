@@ -3,7 +3,6 @@ package de.lorenzware.graffitibackend.controller.api;
 import de.lorenzware.graffitibackend.dto.ApiResponse;
 import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;
 import de.lorenzware.graffitibackend.entity.GraffitiEntity;
-import de.lorenzware.graffitibackend.entity.TagEntity;
 import de.lorenzware.graffitibackend.service.GraffitiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -79,12 +78,18 @@ public class GraffitiController {
             @RequestParam double upperLeftLongitude,
             @RequestParam double lowerRightLatitude,
             @RequestParam double lowerRightLongitude,
-            @RequestParam int max)  throws IOException {
+            @RequestParam int max,
+            @RequestParam(value = "minCreatedAt", required = false) String minCreatedAt,
+            @RequestParam(value = "maxCreatedAt", required = false) String maxCreatedAt,
+            @RequestParam(value = "tagWildcardString", required = false) String tagWildcardString) {
 
         LoadGraffitiResponse response = graffitiService.loadGraffitiInArea(
                 upperLeftLatitude, upperLeftLongitude,
                 lowerRightLatitude, lowerRightLongitude,
-                max
+                max,
+                minCreatedAt,
+                maxCreatedAt,
+                tagWildcardString
         );
         log.info("Loaded graffiti response: {}", response);
         return ResponseEntity.ok(response);

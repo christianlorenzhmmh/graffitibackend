@@ -22,7 +22,8 @@ public class GraffitiConverter {
                 ge.getLatitude() != null ? ge.getLatitude().toString() : null,
                 ge.getLongitude() != null ? ge.getLongitude().toString() : null,
                 ge.getAltitude() != null ? ge.getAltitude().toString() : null,
-                ge.getPhotoPath()
+                ge.getPhotoPath(),
+                ge.getCreatedAt()
         );
     }
 

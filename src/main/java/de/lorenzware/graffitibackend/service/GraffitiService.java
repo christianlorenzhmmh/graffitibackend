@@ -167,14 +167,31 @@ public class GraffitiService {
     public LoadGraffitiResponse loadGraffitiInArea(
             double upperLeftLat, double upperLeftLon,
             double lowerRightLat, double lowerRightLon,
-            int max) {
+            int max,
+            String minCreatedAt,
+            String maxCreatedAt,
+            String tagWildcardString) {
 
-        List<GraffitiEntity> graffitiEntityList = graffitiRepository.findGraffitiInRectangle(
+        // Tag-IDs suchen, falls tagWildcardString gesetzt ist
+        List<Long> tagIds = null;
+        if (tagWildcardString != null && !tagWildcardString.isEmpty()) {
+            tagIds = tagRepository.findAll().stream()
+                    .filter(tag -> tag.getValue() != null && tag.getValue().toLowerCase().contains(tagWildcardString.toLowerCase()))
+                    .map(TagEntity::getId)
+                    .collect(Collectors.toList());
+            if (tagIds.isEmpty()) {
+                // Keine passenden Tags -> keine Graffiti
+                return new LoadGraffitiResponse(LoadGraffitiResponse.RESPONSE_CODE_EMPTY, List.of(), List.of());
+            }
+        }
+
+        // Query dynamisch bauen
+        List<GraffitiEntity> graffitiEntityList = graffitiRepository.findGraffitiWithFilters(
                 Math.min(upperLeftLat, lowerRightLat),
                 Math.max(upperLeftLat, lowerRightLat),
                 Math.min(upperLeftLon, lowerRightLon),
                 Math.max(upperLeftLon, lowerRightLon),
-                max
+                minCreatedAt, maxCreatedAt, tagIds, max
         );
 
         int responseCode = LoadGraffitiResponse.RESPONSE_CODE_OK;
