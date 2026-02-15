@@ -1,17 +1,21 @@
 package de.lorenzware.graffitibackend.controller;
 
 import de.lorenzware.graffitibackend.controller.api.GraffitiController;
+import de.lorenzware.graffitibackend.controller.config.SecurityConfig;
 import de.lorenzware.graffitibackend.dto.GraffitiDto;
 import de.lorenzware.graffitibackend.dto.LoadGraffitiResponse;
 import de.lorenzware.graffitibackend.entity.GraffitiEntity;
 import de.lorenzware.graffitibackend.service.GraffitiService;
+import de.lorenzware.graffitibackend.service.JwtUtil;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -24,7 +28,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+//Für Integrationstests mit Security ist @SpringBootTest + @AutoConfigureMockMvc der Standardweg.
+//Für reine Controller-Tests mit Security reicht @WebMvcTest + @Import(SecurityConfig.class).
 @WebMvcTest(GraffitiController.class)
+@Import({SecurityConfig.class, JwtUtil.class})
 class GraffitiControllerTest {
 
     @Autowired
@@ -34,6 +41,7 @@ class GraffitiControllerTest {
     private GraffitiService graffitiService;
 
     @Test
+//    @WithMockUser(roles = "ADMIN")
     void shouldCreateGraffiti() throws Exception {
         GraffitiEntity graffitiEntity = new GraffitiEntity();
         graffitiEntity.setId(1L);

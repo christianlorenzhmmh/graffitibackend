@@ -2,10 +2,17 @@ package de.lorenzware.graffitibackend.entity;
 
 import java.util.Set;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Table(name = "tag")
 @Entity
-
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class TagEntity {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,37 +24,5 @@ public class TagEntity {
 
     @OneToMany(mappedBy = "tag")
     private Set<GraffitiEntity> graffitiEntities;
-
-    public void setGraffitiEntities(Set<GraffitiEntity> graffitiEntities) { this.graffitiEntities = graffitiEntities; }
-    public Set<GraffitiEntity> getGraffitiEntities() {
-        return graffitiEntities;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-
-
-
-
-
-
-
-
-
-
 
 }

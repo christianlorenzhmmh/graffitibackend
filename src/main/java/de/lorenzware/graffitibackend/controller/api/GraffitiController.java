@@ -7,6 +7,7 @@ import de.lorenzware.graffitibackend.service.GraffitiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -125,6 +126,7 @@ public class GraffitiController {
         return ResponseEntity.ok(new ApiResponse<>(true, updatedGraffitiEntity));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/graffiti/{id}")
     public ResponseEntity<ApiResponse<String>> deleteGraffiti(@PathVariable Long id) {
         graffitiService.deleteGraffiti(id);
