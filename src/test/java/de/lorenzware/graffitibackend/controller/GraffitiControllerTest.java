@@ -82,7 +82,10 @@ class GraffitiControllerTest {
 
         LoadGraffitiResponse response = new LoadGraffitiResponse(RESPONSE_CODE_OK, graffitiEntityList, Lists.emptyList());
 
-        when(graffitiService.loadGraffitiInArea(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyInt()))
+        when(graffitiService.loadGraffitiInArea(anyDouble(), anyDouble(), anyDouble(), anyDouble(),
+                anyString(),
+                anyString(),
+                anyString(), anyInt()))
                 .thenReturn(response);
 
 

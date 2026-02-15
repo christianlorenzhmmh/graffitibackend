@@ -6,24 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        body, html { height: 100%; margin: 0; padding: 0; }
+        body, html {
+            height: 98%;
+            margin: 0;
+            padding: 0;
+            /*border: 20px solid #444;*/
+            box-sizing: border-box;
+        }
         #container {
             display: flex;
-            height: 100vh;
-            width: 100vw;
+            height: calc(100vh - 40px - 2px); /* 2px Reserve für Border-Rendering */
+            width: calc(100vw - 40px - 2px);
+            overflow: hidden;
         }
         #map {
-            height: 100vh;
-            width: 50vw;
+            height: 98vh;
+            width: 49vw;
+            min-width: 300px;
         }
         #details {
-            width: 50vw;
-            height: 100vh;
+            width: 49vw;
+            height: 98vh;
+            min-width: 300px;
             box-sizing: border-box;
             padding: 24px 16px;
             border-left: 1px solid #ccc;
             background: #fafafa;
             overflow-y: auto;
+            overflow-x: hidden;
         }
         #showBtn { margin: 10px; }
         .graffiti-photo {
@@ -44,13 +54,29 @@
 <h2 style="margin-left:16px;">Graffiti Map</h2>
 <div id="container">
     <div style="display:flex; flex-direction:column; width:50vw;">
-        <button id="showBtn">Show graffiti in area</button>
+
         <div id="map"></div>
     </div>
     <div id="details">
+        <div style="margin: 16px 0 8px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; max-width: 350px;">
+            <div style="display: flex; align-items: center; width: 100%; gap: 8px;">
+                <label for="minCreatedAt" style="min-width: 120px;">Min. Erstellungsdatum:</label>
+                <input type="datetime-local" id="minCreatedAt" name="minCreatedAt" style="flex:1;">
+            </div>
+            <div style="display: flex; align-items: center; width: 100%; gap: 8px;">
+                <label for="maxCreatedAt" style="min-width: 120px;">Max. Erstellungsdatum:</label>
+                <input type="datetime-local" id="maxCreatedAt" name="maxCreatedAt" style="flex:1;">
+            </div>
+            <div style="display: flex; align-items: center; width: 100%; gap: 8px;">
+                <label for="tagWildcardString" style="min-width: 120px;">Tag-Suche:</label>
+                <input type="text" id="tagWildcardString" name="tagWildcardString" placeholder="Tag enthält..." style="flex:1;">
+            </div>
+        </div>
+        <button id="showBtn">Show graffiti in area</button>
+
         <div id="graffitiDetailsPlaceholder">Bitte auf einen Marker klicken, um Details anzuzeigen.</div>
+        <div id="tagTableContainer" style="margin-bottom:32px;"></div>
         <div id="graffitiDetails" style="display:none;"></div>
-        <div id="tagTableContainer" style="margin-top:32px;"></div>
     </div>
 </div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -127,8 +153,16 @@
         const lowerRightLon = bounds.getSouthEast().lng;
         const max = 100;
 
+        // Filterwerte auslesen
+        const minCreatedAt = document.getElementById('minCreatedAt').value;
+        const maxCreatedAt = document.getElementById('maxCreatedAt').value;
+        const tagWildcardString = document.getElementById('tagWildcardString').value;
+
         // API-Request
-        const url = `/api/graffiti-in-area?upperLeftLatitude=${upperLeftLat}&upperLeftLongitude=${upperLeftLon}&lowerRightLatitude=${lowerRightLat}&lowerRightLongitude=${lowerRightLon}&max=${max}`;
+        let url = `/api/graffiti-in-area?upperLeftLatitude=${upperLeftLat}&upperLeftLongitude=${upperLeftLon}&lowerRightLatitude=${lowerRightLat}&lowerRightLongitude=${lowerRightLon}&max=${max}`;
+        if (minCreatedAt) url += `&minCreatedAt=${encodeURIComponent(minCreatedAt)}`;
+        if (maxCreatedAt) url += `&maxCreatedAt=${encodeURIComponent(maxCreatedAt)}`;
+        if (tagWildcardString) url += `&tagWildcardString=${encodeURIComponent(tagWildcardString)}`;
         try {
             const response = await fetch(url);
             const data = await response.json();

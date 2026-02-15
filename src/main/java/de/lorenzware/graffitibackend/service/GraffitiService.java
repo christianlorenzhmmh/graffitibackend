@@ -12,6 +12,9 @@ import de.lorenzware.graffitibackend.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -167,16 +172,16 @@ public class GraffitiService {
     public LoadGraffitiResponse loadGraffitiInArea(
             double upperLeftLat, double upperLeftLon,
             double lowerRightLat, double lowerRightLon,
-            int max,
             String minCreatedAt,
             String maxCreatedAt,
-            String tagWildcardString) {
+            String tagWildcardString,
+            int max) {
 
         // Tag-IDs suchen, falls tagWildcardString gesetzt ist
         List<Long> tagIds = null;
         if (tagWildcardString != null && !tagWildcardString.isEmpty()) {
-            tagIds = tagRepository.findAll().stream()
-                    .filter(tag -> tag.getValue() != null && tag.getValue().toLowerCase().contains(tagWildcardString.toLowerCase()))
+            tagIds = tagRepository.findByValueContainingIgnoreCase(tagWildcardString)
+                    .stream()
                     .map(TagEntity::getId)
                     .collect(Collectors.toList());
             if (tagIds.isEmpty()) {
@@ -185,19 +190,45 @@ public class GraffitiService {
             }
         }
 
+        LocalDateTime minCreated = null;
+        LocalDateTime maxCreated = null;
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        if (minCreatedAt != null && !minCreatedAt.isEmpty()) {
+            minCreated = LocalDateTime.parse(minCreatedAt, formatter);
+        }
+        if (maxCreatedAt != null && !maxCreatedAt.isEmpty()) {
+            maxCreated = LocalDateTime.parse(maxCreatedAt, formatter);
+        }
+
         // Query dynamisch bauen
-        List<GraffitiEntity> graffitiEntityList = graffitiRepository.findGraffitiWithFilters(
+        PageRequest pageRequest = PageRequest.of(0, max  + 1); // +1 um zu prüfen, ob es mehr als max gibt)
+//        List<GraffitiEntity> graffitiEntityList = graffitiRepository.findGraffitiWithFilters(
+//                Math.min(upperLeftLat, lowerRightLat),
+//                Math.max(upperLeftLat, lowerRightLat),
+//                Math.min(upperLeftLon, lowerRightLon),
+//                Math.max(upperLeftLon, lowerRightLon),
+//                minCreated, maxCreated, tagIds, pageRequest
+//        );
+        Specification<GraffitiEntity> spec = GraffitiRepository.withFilters(
                 Math.min(upperLeftLat, lowerRightLat),
                 Math.max(upperLeftLat, lowerRightLat),
                 Math.min(upperLeftLon, lowerRightLon),
-                Math.max(upperLeftLon, lowerRightLon),
-                minCreatedAt, maxCreatedAt, tagIds, max
-        );
+                Math.max(upperLeftLon, lowerRightLon), minCreated, maxCreated, tagIds);
+
+        Page<GraffitiEntity> graffitiEntityListPager =  graffitiRepository.findAll(spec, pageRequest);
+//        if (graffitiEntityList.size() > max) {
+//            graffitiEntityList = graffitiEntityList.stream().limit(max).collect(Collectors.toList());
+//        }
 
         int responseCode = LoadGraffitiResponse.RESPONSE_CODE_OK;
-        if (graffitiEntityList.isEmpty()) responseCode = LoadGraffitiResponse.RESPONSE_CODE_EMPTY;
-        else if (graffitiEntityList.size() > max) responseCode = RESPONSE_CODE_MORE_THAN_MAX;
+        if (graffitiEntityListPager.isEmpty()) {
+            responseCode = LoadGraffitiResponse.RESPONSE_CODE_EMPTY;
+        } else if (graffitiEntityListPager.getContent().size() > max) {
+            responseCode = RESPONSE_CODE_MORE_THAN_MAX;
+        }
 
+        int newMaxIndexIfResultListIsLongerThanMax = Math.min(max, graffitiEntityListPager.getContent().size());
+        List<GraffitiEntity> graffitiEntityList = graffitiEntityListPager.toList().subList(0, newMaxIndexIfResultListIsLongerThanMax);
         List<GraffitiDto> dtoList = graffitiConverter.toDtoList(graffitiEntityList);
 
         // TagCounts berechnen

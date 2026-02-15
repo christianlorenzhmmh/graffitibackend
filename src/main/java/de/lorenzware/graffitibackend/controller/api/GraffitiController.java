@@ -86,10 +86,10 @@ public class GraffitiController {
         LoadGraffitiResponse response = graffitiService.loadGraffitiInArea(
                 upperLeftLatitude, upperLeftLongitude,
                 lowerRightLatitude, lowerRightLongitude,
-                max,
                 minCreatedAt,
                 maxCreatedAt,
-                tagWildcardString
+                tagWildcardString,
+                max
         );
         log.info("Loaded graffiti response: {}", response);
         return ResponseEntity.ok(response);
